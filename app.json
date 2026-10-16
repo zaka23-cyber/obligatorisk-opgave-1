@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Appudvikling – Noter",
+    "slug": "appudvikling-noter",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Vælg et billede til din note.",
+          "cameraPermission": "Tag et billede til din note.",
+          "microphonePermission": false
+        }
+      ]
+    ]
+  }
+}

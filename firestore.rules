@@ -1,0 +1,35 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // brugere/{uid}/noter/{noteId}:
+    // tekst: 1-2000 tegn. latitude/longitude: begge null eller gyldige tal.
+    // billedeSti/billedeUrl: valgfrie, men skal optræde sammen.
+    function ejer(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+    function gyldigtSted(data) {
+      return (data.latitude == null && data.longitude == null)
+        || (data.latitude is number && data.longitude is number
+          && data.latitude >= -90 && data.latitude <= 90
+          && data.longitude >= -180 && data.longitude <= 180);
+    }
+    function gyldigtBillede(data, uid) {
+      return !data.keys().hasAny(['billedeSti', 'billedeUrl'])
+        || (data.keys().hasAll(['billedeSti', 'billedeUrl'])
+          && data.billedeSti is string
+          && data.billedeSti.matches('notebilleder/' + uid + '/[A-Za-z0-9]{20}\\.(jpg|png|webp|gif)')
+          && data.billedeUrl is string && data.billedeUrl.size() < 2000
+          && data.billedeUrl.matches('https://firebasestorage\\.googleapis\\.com/v0/b/min-nye-app\\.firebasestorage\\.app/o/notebilleder%2F' + uid + '%2F.*'));
+    }
+    function gyldigNote(data, uid) {
+      return data.keys().hasAll(['tekst', 'latitude', 'longitude'])
+        && data.keys().hasOnly(['tekst', 'latitude', 'longitude', 'billedeSti', 'billedeUrl'])
+        && data.tekst is string && data.tekst.size() > 0 && data.tekst.size() <= 2000
+        && gyldigtSted(data) && gyldigtBillede(data, uid);
+    }
+    match /brugere/{uid}/noter/{noteId} {
+      allow read, delete: if ejer(uid);
+      allow create, update: if ejer(uid) && gyldigNote(request.resource.data, uid);
+    }
+  }
+}
