@@ -162,7 +162,7 @@ export default function App() {
           <FlatList ref={liste} style={styles.liste} data={noter} keyExtractor={(note) => note.id} keyboardShouldPersistTaps="handled"
             ListHeaderComponent={<View>
           <Text style={styles.titel}>Appudvikling – Noter</Text>
-          <Text style={styles.status}>{status}</Text>
+          {status !== 'Forbundet til Firebase' && <Text style={styles.status}>{status}</Text>}
           <Text style={styles.listeTitel}>Steder til dine noter</Text>
           <Text style={styles.status}>Hold fingeren på kortet for at vælge et sted til noten.</Text>
           <NoteKort noter={noter} valgtSted={valgtSted} disabled={gemmer}
